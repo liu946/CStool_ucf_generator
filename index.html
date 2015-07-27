@@ -7,8 +7,8 @@
 	<script type="text/javascript" src="./reference/sd2100.json.js"></script>
 </head>
 
-<body>
 
+<body>
 <!--  component
   	clk,rst:in STD_LOGIC; -- system clock,reset signal
     mcs,mwr,mrd,mbh,mbl: out STD_LOGIC; -- select ,write ,read ,high byte of word,low byte of word signal for MEMORY
@@ -18,13 +18,13 @@
 <!-- 
 	clk,rst,mcs,mwr,mrd,mbh,mbl,iocs,iowr,iord,addr16,data16
 -->
-	<textarea id="component" >
-	clk,rst:in STD_LOGIC; -- system clock,reset signal
-    mcs,mwr,mrd,mbh,mbl: out STD_LOGIC; -- select ,write ,read ,high byte of word,low byte of word signal for MEMORY
-    iocs,iowr,iord: out STD_LOGIC; -- select ,write ,read for IO
+	<textarea id="component" style="height: 200px;width: 80%;">
+	clk:in STD_LOGIC; -- 单映射到clock
+    mcs,mwr,mrd,mbh,mbl: out STD_LOGIC; -- 固定顺序的话可以直接映射到ctrl，也可以写开 cs,wr,rd,bh,bl
     addr16,data16:INOUT STD_LOGIC_VECTOR(15 downto 0):=(others =>'Z') -- address bus; data bus 
-	</textarea>
-	<textarea id="portmap" >s0,s1(6 downto 1),cs,RD,ctrl</textarea>
+	</textarea><br>
+	<textarea id="portmap" style="height: 50px;width: 80%;" >clock,ctrl,addr,data</textarea><br>
+	<textarea id="ucf"  style="height: 500px;width: 80%;"></textarea>
 	<script type="text/javascript">
 		var debug = true;
 		var datalist=[];
@@ -95,9 +95,21 @@
 			var ports = tportstr.split(',');
 			// 4 - generate
 			var generatestr = "";
+			var portspointer = 0;
 			for(var i = 0;i<datalist.length;i++){
-
+				var data = datalist[i];
+				var type = datatype[data];
+				if (type['name']=='std_logic_vector') {
+					var drect = (type['end'] - type['begin'])/Math.abs(type['end'] - type['begin']);
+					for (var j = type['begin']; j != type['end']+drect; j+=drect) {
+						generatestr += ("net \""+data+"("+j+")\" loc=p"+ports[portspointer++]+";\n");
+					};
+				}else{
+					generatestr += ("net \""+data+"\" loc=p"+ports[portspointer++]+";\n");
+				}
+				generatestr += "\n";
 			}
+			$("#ucf").val(generatestr);
 		})
 	</script>
 </body>
