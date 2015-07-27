@@ -26,6 +26,19 @@
 	<textarea id="portmap" ></textarea>
 	<script type="text/javascript">
 		var debug = true;
+		var formatdata=[];
+		function gettype (str) {
+			var tl = (str.replace(")","")).split("(");
+			var type = {};
+			type["name"] = tl[0].toLowerCase();
+			if (type["name"]=="std_logic_vector") {
+				var tlsplit = tl[1].split(/(downto|to)/);
+				type["begin"] = Number(tlsplit[0]);
+				type["end"] = Number(tlsplit[2]);
+			};
+			return type;
+		}
+
 		$(function() {
 			// 0 - get data
 			var txt = $("#component").val();
@@ -39,6 +52,17 @@
 			if (debug) {console.log("[replaced txt 2]"+txt)};
 			txt = txt.replace(/[\s]/g,"");
 			if (debug) {console.log("[replaced txt 3]"+txt)};
+			// 2 - slice
+			var itemlist = txt.split(";");
+			for (var i = 0;i < itemlist.length ; i++) {
+				var value_type = itemlist[i].split(":");
+				var valuelist = value_type[0].split(",");
+				var type = gettype(value_type[1]);
+				for (var j = 0;j < valuelist.length ; j++) {
+					formatdata.push({'name':valuelist[j],'type':type});
+				}
+			};
+
 
 
 		})
