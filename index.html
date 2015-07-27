@@ -4,6 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<title>VHDL SD2100 UCF FILE GENERATOR</title>
 	<script type="text/javascript" src="./reference/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript" src="./reference/sd2100.json.js"></script>
 </head>
 
 <body>
@@ -26,7 +27,7 @@
 	<textarea id="portmap" ></textarea>
 	<script type="text/javascript">
 		var debug = true;
-		var formatdata=[];
+		var datalist=[];
 		var datatype={};
 		function gettype (str) {
 			var tl = (str.replace(")","")).split("(");
@@ -60,14 +61,43 @@
 				var valuelist = value_type[0].split(",");
 				var type = gettype(value_type[1]);
 				for (var j = 0;j < valuelist.length ; j++) {
-					formatdata.push(valuelist[j]);
+					datalist.push(valuelist[j]);
 					datatype[valuelist[j]]=type;
 				}
 			};
-
-
-
-
+			// 3 - port feet 
+			var portmap = $("#portmap").val();
+			if (debug) {console.log("[get portmap]"+portmap)};
+				// remove blank
+			portmap = portmap.replace(/[\s]/g,"").toLowerCase();
+			if (debug) {console.log("[replaced portmap]"+portmap)};
+				// slice
+			var portlist = portmap.split(",");
+			var tportstr="";
+			for(var i = 0;i<portlist.length;i++){
+				var item = (portlist[i].replace(")","")).split('(');
+				if (item.length == 1) {
+					tportstr+=(','+map[item[0]]);
+				} else{
+					var maxbit = map[item[0]].length - 1;
+					var b_e = item[1].split(/(downto|to)/);
+					var list = [];
+					if (b_e[1]=="downto") {
+						list = map[item[0]].slice(maxbit-be[0],maxbit-be[2]+1);
+					}else{
+						list = map[item[0]].slice(maxbit-be[2],maxbit-be[0]+1);
+						list.reverse();
+					}
+					tportstr+=(','+list)
+				};
+			}
+			tportstr=tportstr.slice(1);
+			var ports = tportstr.split(',');
+			// 4 - generate
+			var generatestr = "";
+			for(var i = 0;i<datalist.length;i++){
+				
+			}
 		})
 	</script>
 </body>
