@@ -27,6 +27,7 @@
 	<script type="text/javascript">
 		var debug = true;
 		var formatdata=[];
+		var datatype={};
 		function gettype (str) {
 			var tl = (str.replace(")","")).split("(");
 			var type = {};
@@ -59,9 +60,11 @@
 				var valuelist = value_type[0].split(",");
 				var type = gettype(value_type[1]);
 				for (var j = 0;j < valuelist.length ; j++) {
-					formatdata.push({'name':valuelist[j],'type':type});
+					formatdata.push(valuelist[j]);
+					datatype[valuelist[j]]=type;
 				}
 			};
+
 
 
 
