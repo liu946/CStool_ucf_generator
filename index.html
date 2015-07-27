@@ -24,7 +24,7 @@
     iocs,iowr,iord: out STD_LOGIC; -- select ,write ,read for IO
     addr16,data16:INOUT STD_LOGIC_VECTOR(15 downto 0):=(others =>'Z') -- address bus; data bus 
 	</textarea>
-	<textarea id="portmap" ></textarea>
+	<textarea id="portmap" >s0,s1(6 downto 1),cs,RD,ctrl</textarea>
 	<script type="text/javascript">
 		var debug = true;
 		var datalist=[];
@@ -83,9 +83,9 @@
 					var b_e = item[1].split(/(downto|to)/);
 					var list = [];
 					if (b_e[1]=="downto") {
-						list = map[item[0]].slice(maxbit-be[0],maxbit-be[2]+1);
+						list = map[item[0]].slice(maxbit-b_e[0],maxbit-b_e[2]+1);
 					}else{
-						list = map[item[0]].slice(maxbit-be[2],maxbit-be[0]+1);
+						list = map[item[0]].slice(maxbit-b_e[2],maxbit-b_e[0]+1);
 						list.reverse();
 					}
 					tportstr+=(','+list)
@@ -96,7 +96,7 @@
 			// 4 - generate
 			var generatestr = "";
 			for(var i = 0;i<datalist.length;i++){
-				
+
 			}
 		})
 	</script>
