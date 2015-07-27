@@ -5,112 +5,55 @@
 	<title>VHDL SD2100 UCF FILE GENERATOR</title>
 	<script type="text/javascript" src="./reference/jquery-1.11.1.min.js"></script>
 	<script type="text/javascript" src="./reference/sd2100.json.js"></script>
+	<script type="text/javascript" src='./ucf.js'></script>
 </head>
 
 
 <body>
-<!--  component
-  	clk,rst:in STD_LOGIC; -- system clock,reset signal
-    mcs,mwr,mrd,mbh,mbl: out STD_LOGIC; -- select ,write ,read ,high byte of word,low byte of word signal for MEMORY
-    iocs,iowr,iord: out STD_LOGIC; -- select ,write ,read for IO
-    addr16,data16:INOUT STD_LOGIC_VECTOR(15 downto 0):=(others =>'Z') -- address bus; data bus 
--->
-<!-- 
-	clk,rst,mcs,mwr,mrd,mbh,mbl,iocs,iowr,iord,addr16,data16
--->
-	<textarea id="component" style="height: 200px;width: 80%;">
+<h1>SD2100 UCF 文件生成器</h1>
+
+<p>像写元件例化一样写UCF</p>
+<p>更具体的说明见 <a href="https://github.com/liu946/CStool_ucf_generator">github repo</a></p>
+<hr>
+
+<h5>填空完成对元件的testbench的书写即可生成UCF文件</h5>
+<hr>
+<pre><code class="language-vhdl">entity FPGA is 
+  PORT(
+  s0,s1,s2,s3,s4,s5:STD_LOGIC_VECTOR(7 downto 0); -- 数码管显示脚
+  a,b,c:STD_LOGIC_VECTOR(7 downto 0); -- LED显示脚
+  k0,k1,k2,k3,k4:STD_LOGIC_VECTOR(7 downto 0); -- 开关输入
+  data,addr:STD_LOGIC_VECTOR(15 downto 0); -- 数据，地址线
+  ctrl:STD_LOGIC_VECTOR(4 downto 0); -- 访存控制，注意顺序(也可使用下面的独立引脚)
+  cs,wr,rd,bh,bl:STD_LOGIC; -- 访存控制
+  clock,int,txd,rxd:STD_LOGIC; -- 时钟，终端，串口控制
+  );
+end entity FPGA;
+
+architecture bhv of FPGA is
+component YOURCOMPONENT
+  PORT(
+  <textarea id="component" style="height: 100px;width: 80%;">
 	clk:in STD_LOGIC; -- 单映射到clock
     mcs,mwr,mrd,mbh,mbl: out STD_LOGIC; -- 固定顺序的话可以直接映射到ctrl，也可以写开 cs,wr,rd,bh,bl
     addr16,data16:INOUT STD_LOGIC_VECTOR(15 downto 0):=(others =>'Z') -- address bus; data bus 
-	</textarea><br>
-	<textarea id="portmap" style="height: 50px;width: 80%;" >clock,ctrl,addr,data</textarea><br>
-	<textarea id="ucf"  style="height: 500px;width: 80%;"></textarea>
-	<script type="text/javascript">
-		var debug = true;
-		var datalist=[];
-		var datatype={};
-		function gettype (str) {
-			var tl = (str.replace(")","")).split("(");
-			var type = {};
-			type["name"] = tl[0].toLowerCase();
-			if (type["name"]=="std_logic_vector") {
-				var tlsplit = tl[1].split(/(downto|to)/);
-				type["begin"] = Number(tlsplit[0]);
-				type["end"] = Number(tlsplit[2]);
-			};
-			return type;
-		}
+	</textarea>
+ );
+end component;
+begin
+union:YOURCOMPONENT port map(
+<textarea id="portmap" style="height: 50px;width: 80%;" >clock,ctrl,addr,data</textarea>
+);
+end;
+</code></pre>
+<hr><hr>
+<button id='generate'> 生成UCF </button><br>
+<textarea id="ucf"  style="height: 300px;width: 80%;"></textarea>
+<h2>其他</h2>
 
-		$(function() {
-			// 0 - get data
-			var txt = $("#component").val();
-			if (debug) {console.log("[get txt]"+txt)};
-			// 1 - remove comment , in|out cmp,init valuable and blank
-			txt = txt.replace(/--.*?\n/g,"\n");
-			if (debug) {console.log("[replaced txt 0]"+txt)};
-			txt = txt.replace(/(in|out|inout) /ig,"");
-			if (debug) {console.log("[replaced txt 1]"+txt)};
-			txt = txt.replace(/\:\=.*?\n/g,"");
-			if (debug) {console.log("[replaced txt 2]"+txt)};
-			txt = txt.replace(/[\s]/g,"");
-			if (debug) {console.log("[replaced txt 3]"+txt)};
-			// 2 - slice
-			var itemlist = txt.split(";");
-			for (var i = 0;i < itemlist.length ; i++) {
-				var value_type = itemlist[i].split(":");
-				var valuelist = value_type[0].split(",");
-				var type = gettype(value_type[1]);
-				for (var j = 0;j < valuelist.length ; j++) {
-					datalist.push(valuelist[j]);
-					datatype[valuelist[j]]=type;
-				}
-			};
-			// 3 - port feet 
-			var portmap = $("#portmap").val();
-			if (debug) {console.log("[get portmap]"+portmap)};
-				// remove blank
-			portmap = portmap.replace(/[\s]/g,"").toLowerCase();
-			if (debug) {console.log("[replaced portmap]"+portmap)};
-				// slice
-			var portlist = portmap.split(",");
-			var tportstr="";
-			for(var i = 0;i<portlist.length;i++){
-				var item = (portlist[i].replace(")","")).split('(');
-				if (item.length == 1) {
-					tportstr+=(','+map[item[0]]);
-				} else{
-					var maxbit = map[item[0]].length - 1;
-					var b_e = item[1].split(/(downto|to)/);
-					var list = [];
-					if (b_e[1]=="downto") {
-						list = map[item[0]].slice(maxbit-b_e[0],maxbit-b_e[2]+1);
-					}else{
-						list = map[item[0]].slice(maxbit-b_e[2],maxbit-b_e[0]+1);
-						list.reverse();
-					}
-					tportstr+=(','+list)
-				};
-			}
-			tportstr=tportstr.slice(1);
-			var ports = tportstr.split(',');
-			// 4 - generate
-			var generatestr = "";
-			var portspointer = 0;
-			for(var i = 0;i<datalist.length;i++){
-				var data = datalist[i];
-				var type = datatype[data];
-				if (type['name']=='std_logic_vector') {
-					var drect = (type['end'] - type['begin'])/Math.abs(type['end'] - type['begin']);
-					for (var j = type['begin']; j != type['end']+drect; j+=drect) {
-						generatestr += ("net \""+data+"("+j+")\" loc=p"+ports[portspointer++]+";\n");
-					};
-				}else{
-					generatestr += ("net \""+data+"\" loc=p"+ports[portspointer++]+";\n");
-				}
-				generatestr += "\n";
-			}
-			$("#ucf").val(generatestr);
-		})
-	</script>
+<p><a href="http://liu946.github.io/">Michael Liu HIT</a></p>
+
+<p><a href="https://github.com/liu946/CStool_ucf_generator">github repo</a></p>
+
 </body>
 </html>
