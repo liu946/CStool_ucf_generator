@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>VHDL SD2100 UCF FILE GENERATOR</title>
+	<script type="text/javascript" src="./reference/jquery-1.11.1.min.js"></script>
+</head>
+
+<body>
+
+<!--  component
+  	clk,rst:in STD_LOGIC; -- system clock,reset signal
+    mcs,mwr,mrd,mbh,mbl: out STD_LOGIC; -- select ,write ,read ,high byte of word,low byte of word signal for MEMORY
+    iocs,iowr,iord: out STD_LOGIC; -- select ,write ,read for IO
+    addr16,data16:INOUT STD_LOGIC_VECTOR(15 downto 0):=(others =>'Z') -- address bus; data bus 
+-->
+<!-- 
+	clk,rst,mcs,mwr,mrd,mbh,mbl,iocs,iowr,iord,addr16,data16
+-->
+	<textarea id="component" ></textarea>
+	<textarea id="portmap" ></textarea>
+	<script type="text/javascript">
+		var debug = true;
+		$(function() {
+			// 0 - get data
+			var txt = $("#component").val();
+			if (debug) {console.log("[get txt]"+txt)};
+			
+
+		})
+	</script>
+</body>
+</html>
