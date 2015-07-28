@@ -17,7 +17,8 @@ function gettype (str) {
 
 $(function() {
 	$('#generate').click(function(){
-
+		datalist=[];
+		datatype={};
 
 		// 0 - get data
 		var txt = $("#component").val();
